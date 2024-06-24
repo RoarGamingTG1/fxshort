@@ -21,7 +21,7 @@ async def send_welcome_message(message):
     await sent_message.delete()
 
     # Ask for Easypaisa account number
-    account_message = await message.reply_text("Please enter your 11-digit Upi account number or +92 format phone number:")
+    account_message = await message.reply_text("Please enter your 11-digit Upi account number or +91 format phone number:")
 
     # Add a message handler for the account number
     @app.on_message(filters.text & filters.reply & filters.user(message.from_user.id) & ~filters.me)
