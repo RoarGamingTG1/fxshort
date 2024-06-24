@@ -35,5 +35,60 @@ async def send_welcome_message(message):
                 await response.delete()
                 await send_links(message)
             else:
-                error_message =
+                error_message = await message.reply_text("Invalid account number. Please enter an 11-digit Upi account number or a +92 format phone number:")
+                await asyncio.sleep(5)
+                await error_message.delete()
+                await validate_account_number()
+        except asyncio.TimeoutError:
+            await message.reply_text("You took too long to respond. Please start again by typing /start.")
 
+    await validate_account_number()
+
+# Function to send links
+async def send_links(message):
+    messages = [
+        {
+            "text": "TasK 1 Complete Join This To Complete ",
+            "url": "https://t.me/Hamster_kombat_bot/start?startapp=kentId6298865570",
+            "image": "https://telegra.ph/file/2b7c09dae3d436795fe73.jpg"
+        },
+        {
+            "text": "TasK 2 Complete Join This To Complete",
+            "url": "https://t.me/herewalletbot/app?startapp=8958752",
+            "image": "https://telegra.ph/file/23d2548eff2b5a98ac8ff.jpg"
+        }
+    ]
+
+    for msg in messages:
+        reply_markup = InlineKeyboardMarkup(
+            [[InlineKeyboardButton("Click Here To Earn ⭐", url=msg["url"])]]
+        )
+        sent_message = await message.reply_photo(
+            photo=msg["image"],
+            caption=msg["text"],
+            reply_markup=reply_markup
+        )
+
+        # Wait for a short period before sending the next message
+        await asyncio.sleep(3)
+
+    # Wait for 60 seconds before sending task completion message
+    await asyncio.sleep(60)
+    
+    # Final message with the share button
+    final_message = "Task completed! Reward 🎉 will be sent after you invite 2 friends to @FxShortBot 🌟"
+    share_button = InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("Share with friends", url="https://t.me/share/url?url=https://t.me/FxShortBot&text=Join @FxShortBot to earn rewards!")]
+        ]
+    )
+    await message.reply_text(final_message, reply_markup=share_button)
+
+# Main message handling function
+@app.on_message(filters.text & ~filters.me)
+async def handle_messages(client, message):
+    if "start" in message.text.lower():
+        await send_welcome_message(message)
+
+# Run the bot
+app.run()
