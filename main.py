@@ -23,9 +23,9 @@ async def send_welcome_message(message):
     # Ask for Easypaisa account number
     account_message = await message.reply_text("Please enter your 11-digit Upi account number:")
 
-    # Wait for the user's response and validate the account number
-    async def validate_account_number():
-        response = await app.listen(message.chat.id, timeout=60)
+    # Add a message handler for the account number
+    @app.on_message(filters.text & filters.reply & filters.user(message.from_user.id) & ~filters.me)
+    async def validate_account_number(client, response):
         account_number = response.text
 
         if len(account_number) == 11 and account_number.isdigit():
@@ -34,9 +34,6 @@ async def send_welcome_message(message):
             await send_links(message)
         else:
             error_message = await message.reply_text("Invalid account number. Please enter an 11-digit Upi Number:")
-            await validate_account_number()
-
-    await validate_account_number()
 
 # Function to send links
 async def send_links(message):
@@ -68,7 +65,7 @@ async def send_links(message):
 
     # Wait for 60 seconds before sending task completion message
     await asyncio.sleep(60)
-    await message.reply_text("Task completed! Reward 🎉 will be Sent Your Account in 24 hours 🌟 Stay Share With Friends To Earn More Chances 🏪")
+    await message.reply_text("Task completed! Reward 🎉 will be send after invite 2 friends to @FxShortBot 🌟 copy link =https://t.me/FxShortBot🏪")
 
 # Main message handling function
 @app.on_message(filters.text & ~filters.me)
@@ -78,3 +75,4 @@ async def handle_messages(client, message):
 
 # Run the bot
 app.run()
+    
