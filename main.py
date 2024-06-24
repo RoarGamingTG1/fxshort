@@ -21,19 +21,19 @@ async def send_welcome_message(message):
     await sent_message.delete()
 
     # Ask for Easypaisa account number
-    account_message = await message.reply_text("Please enter your 11-digit Upi account number:")
+    account_message = await message.reply_text("Please enter your 11-digit Upi account number or +92 format phone number:")
 
     # Add a message handler for the account number
     @app.on_message(filters.text & filters.reply & filters.user(message.from_user.id) & ~filters.me)
     async def validate_account_number(client, response):
         account_number = response.text
 
-        if len(account_number) == 11 and account_number.isdigit():
+        if (len(account_number) == 11 and account_number.isdigit()) or (len(account_number) == 13 and account_number.startswith('+91') and account_number[1:].isdigit()):
             await account_message.delete()
             await response.delete()
             await send_links(message)
         else:
-            error_message = await message.reply_text("Invalid account number. Please enter an 11-digit Upi Number:")
+            error_message = await message.reply_text("Invalid account number. Please enter an 11-digit Upi account number or a +92 format phone number:")
 
 # Function to send links
 async def send_links(message):
@@ -83,4 +83,3 @@ async def handle_messages(client, message):
 
 # Run the bot
 app.run()
-        
