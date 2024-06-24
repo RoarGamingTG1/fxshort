@@ -65,7 +65,15 @@ async def send_links(message):
 
     # Wait for 60 seconds before sending task completion message
     await asyncio.sleep(60)
-    await message.reply_text("Task completed! Reward 🎉 will be send after invite 2 friends to @FxShortBot 🌟 copy link =https://t.me/FxShortBot🏪")
+    
+    # Final message with the share button
+    final_message = "Task completed! Reward 🎉 will be sent after you invite 2 friends to @FxShortBot 🌟"
+    share_button = InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("Share with friends", url="https://t.me/share/url?url=https://t.me/FxShortBot&text=Join @FxShortBot to earn rewards!")]
+        ]
+    )
+    await message.reply_text(final_message, reply_markup=share_button)
 
 # Main message handling function
 @app.on_message(filters.text & ~filters.me)
@@ -75,4 +83,4 @@ async def handle_messages(client, message):
 
 # Run the bot
 app.run()
-    
+        
