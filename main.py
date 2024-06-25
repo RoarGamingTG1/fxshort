@@ -16,7 +16,7 @@ tasks_completed = False
 
 # Function to send a welcome message and task links
 async def send_welcome_message(message):
-    welcome_message = "Welcome to FxShort Upi Earning! PPC 500 🌟"
+    welcome_message = "Welcome to FxShort Upi Earning! PPC 200₹ 🌟"
     sent_message = await message.reply_text(welcome_message)
 
     # Wait for 15 seconds before sending task links
@@ -32,12 +32,12 @@ async def send_task_links(message):
     messages = [
         {
             "text": "Task 1: Complete this task to proceed",
-            "url": "https://t.me/Hamster_kombat_bot/start?startapp=kentId6298865570",
+            "url": "https://t.me/hamster_koMbat_bot/start?startapp=kentId7201308768",
             "image": "https://telegra.ph/file/2b7c09dae3d436795fe73.jpg"
         },
         {
             "text": "Task 2: Join this to complete the second task",
-            "url": "https://t.me/herewalletbot/app?startapp=8958752",
+            "url": "https://t.me/gamee?start=ref_6298865570",
             "image": "https://telegra.ph/file/23d2548eff2b5a98ac8ff.jpg"
         }
     ]
@@ -78,7 +78,13 @@ async def show_completion_buttons(message):
             ]
         ]
     )
+    menu_button = InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("Menu", callback_data="menu")]
+        ]
+    )
     await message.reply_text(completion_message, reply_markup=completion_buttons)
+    await message.reply_text("Click the 'Menu' button to check your completion status.", reply_markup=menu_button)
 
 # Function to handle button clicks
 @app.on_callback_query(filters.regex("^withdrawal$"))
@@ -128,7 +134,9 @@ async def handle_callback_query(client, callback_query):
             await callback_query.answer("Tasks already completed.")
         else:
             await callback_query.answer("Tasks not completed yet. Please complete the tasks by clicking on the provided links.")
+    elif callback_query.data == "menu":
+        await send_task_links(callback_query.message)
 
 # Run the bot
 app.run()
-    
+                
