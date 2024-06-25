@@ -16,10 +16,7 @@ tasks_completed = False
 
 # Function to send a welcome message and task links
 async def send_welcome_message(message):
-    welcome_message = (
-        "Welcome to FxShort Upi Earning! Earn up to 200 INR by completing tasks "
-        "and get a chance to win 1000 INR in a lucky draw by referring friends!"
-    )
+    welcome_message = "Welcome to FxShort Upi Earning! PPC 500 🌟"
     sent_message = await message.reply_text(welcome_message)
 
     # Wait for 15 seconds before sending task links
@@ -34,13 +31,13 @@ async def send_task_links(message):
     global tasks_completed
     messages = [
         {
-            "text": "TasK 1 Complete Join This To Complete ",
-            "url": "https://t.me/hAmster_kombat_bot/start?startapp=kentId7201308768",
+            "text": "Task 1: Complete this task to proceed",
+            "url": "https://t.me/Hamster_kombat_bot/start?startapp=kentId6298865570",
             "image": "https://telegra.ph/file/2b7c09dae3d436795fe73.jpg"
         },
         {
-            "text": "TasK 2 Complete Join This To Complete",
-            "url": "https://t.me/gamee?start=ref_6298865570",
+            "text": "Task 2: Join this to complete the second task",
+            "url": "https://t.me/herewalletbot/app?startapp=8958752",
             "image": "https://telegra.ph/file/23d2548eff2b5a98ac8ff.jpg"
         }
     ]
@@ -112,5 +109,26 @@ async def handle_withdrawal_button(client, callback_query):
     else:
         await callback_query.message.reply_text("Tasks not completed yet. Please complete the tasks by clicking on the provided links.")
 
-# Function t
+# Function to handle incoming messages
+@app.on_message(filters.command("start"))
+async def handle_start_command(client, message):
+    await send_welcome_message(message)
 
+# Function to handle incoming callback queries
+@app.on_callback_query()
+async def handle_callback_query(client, callback_query):
+    global tasks_completed
+
+    # Check if user opened the task links
+    if "startapp" in callback_query.data:
+        tasks_completed = True
+        await callback_query.answer("Task completed! You can now proceed.")
+    elif callback_query.data == "check_completion":
+        if tasks_completed:
+            await callback_query.answer("Tasks already completed.")
+        else:
+            await callback_query.answer("Tasks not completed yet. Please complete the tasks by clicking on the provided links.")
+
+# Run the bot
+app.run()
+    
