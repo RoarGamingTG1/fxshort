@@ -11,6 +11,9 @@ API_HASH = os.environ.get("API_HASH")
 # Create Pyrogram client
 app = Client("Mining_Bot", bot_token=BOT_TOKEN, api_id=API_ID, api_hash=API_HASH)
 
+# Global variable to track if tasks are completed
+tasks_completed = False
+
 # Function to send a welcome message and task links
 async def send_welcome_message(message):
     welcome_message = "Welcome to FxShort Upi Earning! PPC 500 🌟"
@@ -25,6 +28,7 @@ async def send_welcome_message(message):
 
 # Function to send task links
 async def send_task_links(message):
+    global tasks_completed
     messages = [
         {
             "text": "TasK 1 Complete Join This To Complete ",
@@ -51,11 +55,14 @@ async def send_task_links(message):
         # Wait for a short period before sending the next message
         await asyncio.sleep(3)
 
-    # Wait for 60 seconds before sending task completion message
+    # Wait for 60 seconds for the user to complete the tasks
     await asyncio.sleep(60)
 
-    # After tasks are completed, show buttons for withdrawal and refer a friend
-    await show_completion_buttons(message)
+    # Check if tasks are completed
+    if tasks_completed:
+        await show_completion_buttons(message)
+    else:
+        await message.reply_text("Tasks not completed yet. Please complete the tasks by clicking on the provided links.")
 
 # Function to show completion buttons
 async def show_completion_buttons(message):
@@ -75,30 +82,47 @@ async def show_completion_buttons(message):
 async def handle_withdrawal_button(client, callback_query):
     await callback_query.answer()
 
-    # Ask for UPI payment ID
-    upi_message = await callback_query.message.reply_text("Please enter your UPI payment ID:")
+    # Check if tasks are completed
+    if tasks_completed:
+        # Ask for UPI payment ID
+        upi_message = await callback_query.message.reply_text("Please enter your UPI payment ID:")
 
-    # Listen for the user's response
-    async def validate_upi_id():
-        try:
-            response = await app.listen(callback_query.message.chat.id, timeout=120)
-            upi_id = response.text.strip()
+        # Listen for the user's response
+        async def validate_upi_id():
+            try:
+                response = await app.listen(callback_query.message.chat.id, timeout=120)
+                upi_id = response.text.strip()
 
-            # Confirm the UPI ID and process the withdrawal
-            await upi_message.delete()
-            await response.delete()
-            confirmation_message = f"Your UPI payment ID ({upi_id}) has been received. Processing your withdrawal. You will receive your reward within 2 hours."
-            await callback_query.message.reply_text(confirmation_message)
+                # Confirm the UPI ID and process the withdrawal
+                await upi_message.delete()
+                await response.delete()
+                confirmation_message = f"Your UPI payment ID ({upi_id}) has been received. Processing your withdrawal. You will receive your reward within 2 hours."
+                await callback_query.message.reply_text(confirmation_message)
 
-        except asyncio.TimeoutError:
-            await callback_query.message.reply_text("You took too long to respond. Please start again if you wish to withdraw.")
+            except asyncio.TimeoutError:
+                await callback_query.message.reply_text("You took too long to respond. Please start again if you wish to withdraw.")
 
-    await validate_upi_id()
+        await validate_upi_id()
+    else:
+        await callback_query.message.reply_text("Tasks not completed yet. Please complete the tasks by clicking on the provided links.")
 
-# Main message handling function
+# Function to handle incoming messages
 @app.on_message(filters.command("start"))
 async def handle_start_command(client, message):
     await send_welcome_message(message)
 
+# Function to handle incoming callback queries
+@app.on_callback_query()
+async def handle_callback_query(client, callback_query):
+    global tasks_completed
+
+    # Check if user opened the task links
+    if "startapp" in callback_query.data:
+        tasks_completed = True
+        await callback_query.answer("Task completed! You can now proceed.")
+    else:
+        await callback_query.answer("Invalid action.")
+
 # Run the bot
 app.run()
+
