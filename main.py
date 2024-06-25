@@ -102,4 +102,3 @@ async def handle_start_command(client, message):
 
 # Run the bot
 app.run()
-                                   
