@@ -11,41 +11,20 @@ API_HASH = os.environ.get("API_HASH")
 # Create Pyrogram client
 app = Client("Mining_Bot", bot_token=BOT_TOKEN, api_id=API_ID, api_hash=API_HASH)
 
-# Function to send a welcome message
+# Function to send a welcome message and task links
 async def send_welcome_message(message):
     welcome_message = "Welcome to FxShort Upi Earning! PPC 500 🌟"
     sent_message = await message.reply_text(welcome_message)
 
-    # Wait for 15 seconds before asking for Easypaisa account number
+    # Wait for 15 seconds before sending task links
     await asyncio.sleep(15)
     await sent_message.delete()
 
-    # Ask for Easypaisa account number
-    account_message = await message.reply_text("Please enter your 11-digit Upi account number or +92 format phone number:")
+    # Send task links
+    await send_task_links(message)
 
-    # Listen for the user's response and validate the account number
-    async def validate_account_number():
-        try:
-            response = await app.listen(message.chat.id, timeout=60)
-            account_number = response.text
-
-            # Check if the entered account number is valid
-            if (len(account_number) == 11 and account_number.isdigit()) or (len(account_number) == 13 and account_number.startswith('+92') and account_number[1:].isdigit()):
-                await account_message.delete()
-                await response.delete()
-                await send_links(message)
-            else:
-                error_message = await message.reply_text("Invalid account number. Please enter an 11-digit Upi account number or a +92 format phone number:")
-                await asyncio.sleep(5)
-                await error_message.delete()
-                await validate_account_number()
-        except asyncio.TimeoutError:
-            await message.reply_text("You took too long to respond. Please start again by typing /start.")
-
-    await validate_account_number()
-
-# Function to send links
-async def send_links(message):
+# Function to send task links
+async def send_task_links(message):
     messages = [
         {
             "text": "TasK 1 Complete Join This To Complete ",
@@ -74,21 +53,53 @@ async def send_links(message):
 
     # Wait for 60 seconds before sending task completion message
     await asyncio.sleep(60)
-    
-    # Final message with the share button
-    final_message = "Task completed! Reward 🎉 will be sent after you invite 2 friends to @FxShortBot 🌟"
-    share_button = InlineKeyboardMarkup(
+
+    # After tasks are completed, show buttons for withdrawal and refer a friend
+    await show_completion_buttons(message)
+
+# Function to show completion buttons
+async def show_completion_buttons(message):
+    completion_message = "Tasks completed! What would you like to do next?"
+    completion_buttons = InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("Share with friends", url="https://t.me/share/url?url=https://t.me/FxShortBot&text=Join @FxShortBot to earn rewards!")]
+            [
+                InlineKeyboardButton("Withdrawal", callback_data="withdrawal"),
+                InlineKeyboardButton("Refer a Friend", url="https://t.me/share/url?url=https://t.me/FxShortBot&text=Join @FxShortBot to earn rewards!")
+            ]
         ]
     )
-    await message.reply_text(final_message, reply_markup=share_button)
+    await message.reply_text(completion_message, reply_markup=completion_buttons)
+
+# Function to handle button clicks
+@app.on_callback_query(filters.regex("^withdrawal$"))
+async def handle_withdrawal_button(client, callback_query):
+    await callback_query.answer()
+
+    # Ask for UPI payment ID
+    upi_message = await callback_query.message.reply_text("Please enter your UPI payment ID:")
+
+    # Listen for the user's response
+    async def validate_upi_id():
+        try:
+            response = await app.listen(callback_query.message.chat.id, timeout=120)
+            upi_id = response.text.strip()
+
+            # Confirm the UPI ID and process the withdrawal
+            await upi_message.delete()
+            await response.delete()
+            confirmation_message = f"Your UPI payment ID ({upi_id}) has been received. Processing your withdrawal. You will receive your reward within 2 hours."
+            await callback_query.message.reply_text(confirmation_message)
+
+        except asyncio.TimeoutError:
+            await callback_query.message.reply_text("You took too long to respond. Please start again if you wish to withdraw.")
+
+    await validate_upi_id()
 
 # Main message handling function
-@app.on_message(filters.text & ~filters.me)
-async def handle_messages(client, message):
-    if "start" in message.text.lower():
-        await send_welcome_message(message)
+@app.on_message(filters.command("start"))
+async def handle_start_command(client, message):
+    await send_welcome_message(message)
 
 # Run the bot
 app.run()
+                                   
